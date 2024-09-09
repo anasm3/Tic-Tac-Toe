@@ -1,111 +1,118 @@
-const Gameboard = (() => {
-    let board = Array(9).fill(null);
+class Gameboard {
+    constructor() {
+        this.board = Array(9).fill(null);
+    }
 
-    let getBoard = () => {
-        return board;
-    };
+    getBoard() {
+        return this.board;
+    }
 
-    let setMark = ((index, mark) => {
-        if (board[index] === null) {
-            board[index] = mark;
+    setMark(index, mark) {
+        if (this.board[index] === null) {
+            this.board[index] = mark;
             return true;
         }
         return false;
-    });
+    }
 
-    let checkWinner = () => {
+    checkWinner() {
         const winningCombos = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
-            [0, 4, 8], [2, 4, 6]              
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ];
 
         for (const [a, b, c] of winningCombos) {
-            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                return board[a];
+            if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
+                return this.board[a];
             }
         }
-        if (board.every(cell => cell !== null)) {
+        if (this.board.every(cell => cell !== null)) {
             return 'Tie';
         }
         return null;
-    };
-
-    let reset = () => {
-        board = Array(9).fill(null);
     }
 
-    return {
-        getBoard,
-        setMark,
-        checkWinner,
-        reset
-    };
-})();
+    reset() {
+        this.board = Array(9).fill(null);
+    }
+}
 
-const Player = ((name, mark) => {
-    return { name, mark };
-});
+class Player {
+    constructor(name, mark) {
+        this.name = name;
+        this.mark = mark;
+    }
+}
 
-const GameController = (() => {
-    let currentPlayer;
-    let winner;
+class GameController {
+    constructor() {
+        this.gameboard = new Gameboard();
+        this.currentPlayer = new Player('Anas', 'X');
+        this.winner = null;
+    }
 
-    let init = () => {
-        const player1 = Player('Anas', 'X');
-        const player2 = Player('Ali', 'O');
-        currentPlayer = player1;
+    init() {
+        const player1 = new Player('Anas', 'X');
+        const player2 = new Player('Ali', 'O');
+        this.currentPlayer = player1;
 
         const boardElement = document.getElementById('board');
-        boardElement.innerHTML = ''; 
-        Gameboard.getBoard().forEach((_, index) => {
+        boardElement.innerHTML = '';
+        this.gameboard.getBoard().forEach((_, index) => {
             const cell = document.createElement('div');
             cell.classList.add('cell');
             cell.dataset.index = index;
             boardElement.appendChild(cell);
         });
 
-        boardElement.addEventListener('click', handleClick);
-        document.getElementById('restart').addEventListener('click', restartGame);
-    };
+        boardElement.addEventListener('click', this.handleClick.bind(this));
+        document.getElementById('restart').addEventListener('click', this.restartGame.bind(this));
+    }
 
-    let handleClick = ((event) => {
+    handleClick(event) {
         const index = event.target.dataset.index;
-        if (index !== undefined && Gameboard.setMark(parseInt(index), currentPlayer.mark)) {
-            updateBoard();
-            winner = Gameboard.checkWinner();
-            if (winner) {
-                displayMessage(winner);
-                document.getElementById('board').removeEventListener('click', handleClick);
+        if (index !== undefined && this.gameboard.setMark(parseInt(index), this.currentPlayer.mark)) {
+            this.updateBoard();
+            this.winner = this.gameboard.checkWinner();
+            if (this.winner) {
+                this.displayMessage(this.winner);
+                document.getElementById('board').removeEventListener('click', this.handleClick.bind(this));
             } else {
-                switchPlayer();
+                this.switchPlayer();
             }
         }
-    });
+    }
 
-    let switchPlayer = () => {
-        currentPlayer = (currentPlayer.mark === 'X') ? Player('Ali', 'O') : Player('Anas', 'X');
-    };
+    switchPlayer() {
+        this.currentPlayer = (this.currentPlayer.mark === 'X') 
+            ? new Player('Ali', 'O') 
+            : new Player('Anas', 'X');
+    }
 
-    let updateBoard = () => {
+    updateBoard() {
         const cells = document.querySelectorAll('#board .cell');
-        Gameboard.getBoard().forEach((mark, index) => {
+        this.gameboard.getBoard().forEach((mark, index) => {
             cells[index].textContent = mark;
         });
-    };
-
-    let displayMessage = ((message) => {
-        document.getElementById('message').textContent = (message === 'Tie') ? "It's a tie!" : `${currentPlayer.name} wins!`;
-    });
-
-    let restartGame = () => {
-        Gameboard.reset();
-        updateBoard();
-        document.getElementById('message').textContent = '';
-        currentPlayer = Player('Anas', 'X');
-        document.getElementById('board').addEventListener('click', handleClick);
     }
-    return { init };
-})();
 
-addEventListener('DOMContentLoaded', () => GameController.init());
+    displayMessage(message) {
+        document.getElementById('message').textContent = (message === 'Tie') 
+            ? "It's a tie!" 
+            : `${this.currentPlayer.name} wins!`;
+    }
+
+    restartGame() {
+        this.gameboard.reset();
+        this.updateBoard();
+        document.getElementById('message').textContent = '';
+        this.currentPlayer = new Player('Anas', 'X');
+        document.getElementById('board').addEventListener('click', this.handleClick.bind(this));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const gameController = new GameController();
+    gameController.init();
+});
