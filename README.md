@@ -5,4 +5,5 @@ Links
 Live Site URL: https://tic-tac-tooooe.netlify.app
 Solution URL: https://github.com/anasm3/Tic-Tac-Toe.git
 
-![tic-tac-toe](https://github.com/user-attachments/assets/b56956b8-3aab-40ef-ba26-c84727dd42a6)
+
+![tic-tac-toe](https://github.com/user-attachments/assets/118b0ce0-f5f9-4c86-8dd4-5463db470742)
